@@ -87,7 +87,10 @@ function Login() {
     setLoading(true);
 
     try {
-      const data = await loginUser({ username, password });
+      const data = await loginUser({
+        username: username.trim(),
+        password: password.trim(),
+      });
 
       localStorage.setItem("authToken", data.token);
       localStorage.setItem("role", data.role);

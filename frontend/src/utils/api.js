@@ -66,7 +66,6 @@ export const loginUser = async (credentials) => {
 
   return handleResponse(response);
 };
-
 // ==============================
 // DASHBOARD
 // ==============================
