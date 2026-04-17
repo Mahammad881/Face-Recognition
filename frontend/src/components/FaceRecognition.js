@@ -1,6 +1,6 @@
 // frontend/src/components/FaceRecognition.js
 import React, { useRef, useEffect, useState } from "react";
-import * as faceapi from "face-api.js";
+import * as faceapi from "face-api.js/dist/face-api.esm.js";
 import { getStudentDescriptors, markPresent } from "../utils/api";
 const MODEL_PATH = "/models";
 const MIN_DISTANCE_THRESHOLD = 0.45;
