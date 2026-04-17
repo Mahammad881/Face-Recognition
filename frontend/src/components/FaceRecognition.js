@@ -1,63 +1,116 @@
 // frontend/src/components/FaceRecognition.js
-
 import React, { useRef, useEffect, useState } from "react";
 import * as faceapi from "face-api.js";
 import { getStudentDescriptors, markPresent } from "../utils/api";
-
 const MODEL_PATH = "/models";
 const MIN_DISTANCE_THRESHOLD = 0.45;
 const DETECTION_INTERVAL = 500;
+// ✅ ✅ ✅ ADD THIS HERE (ABOVE COMPONENT)
 
+const getRemainingPeriodTime = (currentTime, startTime) => {
+  const TOTAL_MS = 60 * 60 * 1000;
+
+  const elapsed = currentTime - startTime;
+  const remaining = Math.max(0, TOTAL_MS - elapsed);
+
+  const mins = Math.floor(remaining / 60000);
+
+  return `${mins} min`; // ✅ ONLY MINUTES
+};
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+};
 function FaceRecognition() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-
   const [message, setMessage] = useState("⏳ Loading models...");
   const [faceMatcher, setFaceMatcher] = useState(null);
-
   const studentsRef = useRef([]);
   const detectingRef = useRef(false);
   const intervalRef = useRef(null);
   const messageRef = useRef("");
   const noFaceCountRef = useRef(0);
+  const speakingRef = useRef(false);
+ 
+  const [currentTime, setCurrentTime] = useState(Date.now());
+  const currentTimeRef = useRef(currentTime);
 
+  const PERIOD_START_TIME = useRef(
+    new Date(new Date().setMinutes(0, 0, 0)) // start of current hour
+  );
+  const speak = (text) => {
+    if (speakingRef.current) return;
+    speakingRef.current = true;
+    const speech = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    // 🎯 Select female voice
+    const femaleVoice =
+      voices.find(
+        (v) =>
+          v.name.toLowerCase().includes("female") ||
+          v.name.toLowerCase().includes("zira") || // Windows
+          v.name.toLowerCase().includes("samantha") || // Mac
+          v.name.toLowerCase().includes("google uk english female"),
+      ) || voices[0];
+    speech.voice = femaleVoice;
+    speech.lang = femaleVoice.lang;
+    // 🎯 Natural sound tuning
+    speech.rate = 0.9;
+    speech.pitch = 1.2;
+    speech.onend = () => {
+      speakingRef.current = false;
+    };
+    window.speechSynthesis.speak(speech);
+  };
+
+  useEffect(() => {
+    currentTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.getVoices();
+    };
+  }, []);
   useEffect(() => {
     messageRef.current = message;
   }, [message]);
-
   // ✅ LOAD MODELS + CAMERA
   useEffect(() => {
     let stream;
-
     const setup = async () => {
       try {
         setMessage("⏳ Loading AI models...");
-
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_PATH),
           faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_PATH),
           faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_PATH),
         ]);
-
         setMessage("✅ Models loaded. Starting camera...");
-
         stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480 },
         });
-
         videoRef.current.srcObject = stream;
         // ✅ ADD HERE
         videoRef.current.onplay = () => console.log("🎥 Video started");
-
         await loadStudents();
       } catch (err) {
         console.error(err);
         setMessage("❌ Failed to load models or camera.");
       }
     };
-
     setup();
-
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -65,34 +118,26 @@ function FaceRecognition() {
       clearInterval(intervalRef.current);
     };
   }, []);
-
   // ✅ FIXED LOAD STUDENTS (MAIN FIX HERE 🔥)
   const loadStudents = async () => {
     try {
       const data = await getStudentDescriptors();
-
       console.log("🔥 RAW DATA:", data);
-
       if (!data || !data.length) {
         setMessage("⚠ No students enrolled yet.");
         return;
       }
-
       studentsRef.current = data.map((s) => ({
         studentId: s.studentId,
         name: s.name,
         descriptor: s.descriptor,
         lastMarked: null,
       }));
-
       const labeledDescriptors = [];
-
       data.forEach((student) => {
         try {
           let descriptor = student.descriptor;
-
           if (!descriptor) return;
-
           // ✅ FIX 1: Proper JSON parse
           if (typeof descriptor === "string") {
             descriptor = JSON.parse(descriptor);
@@ -101,11 +146,9 @@ function FaceRecognition() {
           const descriptorList = Array.isArray(descriptor[0])
             ? descriptor
             : [descriptor];
-
           const floatDescriptors = descriptorList.map(
             (d) => new Float32Array(d.map((v) => Number(v))),
           );
-
           labeledDescriptors.push(
             new faceapi.LabeledFaceDescriptors(
               student.studentId,
@@ -116,21 +159,16 @@ function FaceRecognition() {
           console.error("❌ Parse failed:", student.name, err);
         }
       });
-
       console.log("✅ FINAL COUNT:", labeledDescriptors.length);
-
       if (!labeledDescriptors.length) {
         setMessage("❌ No valid face data found.");
         return;
       }
-
       const matcher = new faceapi.FaceMatcher(
         labeledDescriptors,
         MIN_DISTANCE_THRESHOLD,
       );
-
       setFaceMatcher(matcher);
-
       setMessage(`✅ Loaded ${labeledDescriptors.length} student(s)`);
     } catch (err) {
       console.error(err);
@@ -141,22 +179,17 @@ function FaceRecognition() {
   // ✅ DETECTION LOOP
   useEffect(() => {
     if (!faceMatcher || !videoRef.current) return;
-
     const video = videoRef.current;
     const canvas = canvasRef.current;
-
     const startDetection = () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-
       const displaySize = { width: 640, height: 480 };
       faceapi.matchDimensions(canvas, displaySize);
-
       intervalRef.current = setInterval(async () => {
         if (detectingRef.current) return;
         detectingRef.current = true;
-
         try {
           const detections = await faceapi
             .detectAllFaces(
@@ -168,26 +201,20 @@ function FaceRecognition() {
             )
             .withFaceLandmarks(true)
             .withFaceDescriptors();
-
           const resized = faceapi.resizeResults(detections, displaySize);
-
           if (resized.length === 0) {
             noFaceCountRef.current++;
-
             if (noFaceCountRef.current > 5) {
               setMessage("⚠ No face detected");
             }
           } else {
             noFaceCountRef.current = 0;
           }
-
           const ctx = canvas.getContext("2d");
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-
           resized.forEach((detection) => {
             const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
             const box = detection.detection.box;
-
             if (
               bestMatch.label !== "unknown" &&
               bestMatch.distance < MIN_DISTANCE_THRESHOLD
@@ -195,18 +222,34 @@ function FaceRecognition() {
               const student = studentsRef.current.find(
                 (s) => s.studentId === bestMatch.label,
               );
-
               if (!student) return;
               const now = Date.now();
-
-              if (!student.lastMarked || now - student.lastMarked > 5000) {
+              if (!student.lastMarked || now - student.lastMarked > 60000) {
                 markPresent(student.studentId)
                   .then((res) => {
                     if (res.status === "cooldown") {
-                      setMessage(`⏳ ${student.name}: ${res.message}`);
+                      const remainingTime = getRemainingPeriodTime(
+                        currentTimeRef.current,
+                        PERIOD_START_TIME.current,
+                      );
+                      const msg = `${student.name}, you already marked attendance. ${remainingTime} remaining in this period`;
+                      setMessage(
+                        `⏳ ${student.name} You're Already Present come after: ${remainingTime} time`,
+                      );
+                      setTimeout(() => speak(msg), 300);
                     } else if (res.status === "success") {
+                     
                       student.lastMarked = now;
-                      setMessage(`✅ ${student.name} marked present`);
+
+                      const remainingTime = getRemainingPeriodTime(
+                        currentTimeRef.current,
+                        PERIOD_START_TIME.current,
+                      );
+                      const msg = `${getGreeting()} ${student.name}, attendance marked. You have ${remainingTime} remaining in this period`;
+                      setMessage(
+                        `✅ ${student.name} marked • Remaining: ${remainingTime}`,
+                      );
+                      setTimeout(() => speak(msg), 300);
                     } else {
                       setMessage(`⚠ ${student.name}: Unexpected response`);
                     }
@@ -215,9 +258,8 @@ function FaceRecognition() {
                     setMessage(`❌ ${student.name}: ${err.message}`);
                   });
               }
-
               new faceapi.draw.DrawBox(box, {
-                label: bestMatch.label,
+                label: student.name,
               }).draw(canvas);
             } else {
               new faceapi.draw.DrawBox(box, {
@@ -228,11 +270,9 @@ function FaceRecognition() {
         } catch (err) {
           console.error("Detection error:", err);
         }
-        
         detectingRef.current = false;
       }, DETECTION_INTERVAL);
     };
-
     // ✅ THIS WAS MISSING
     if (video.readyState === 4) {
       setTimeout(startDetection, 500);
@@ -241,18 +281,14 @@ function FaceRecognition() {
         setTimeout(startDetection, 500);
       };
     }
-
     return () => {
       clearInterval(intervalRef.current);
     };
   }, [faceMatcher]);
-
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
       <h2>🎓 Smart Attendance Kiosk</h2>
-
       <p style={{ color: "#007bff", fontWeight: "bold" }}>{message}</p>
-
       <div style={{ position: "relative", display: "inline-block" }}>
         <video
           ref={videoRef}
@@ -263,7 +299,6 @@ function FaceRecognition() {
           height="480"
           style={{ borderRadius: "10px" }}
         />
-
         <canvas
           ref={canvasRef}
           width="640"
@@ -279,5 +314,4 @@ function FaceRecognition() {
     </div>
   );
 }
-
 export default FaceRecognition;

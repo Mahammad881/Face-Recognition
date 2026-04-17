@@ -3,6 +3,22 @@
 
 const API_BASE_URL = "http://localhost:8080/api";
 
+// TOKEN UTILS
+// ==============================
+
+export const getUserFromToken = () => {
+  const token = localStorage.getItem("authToken");
+
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload;
+  } catch (err) {
+    console.error("Invalid token");
+    return null;
+  }
+};
 /**
  * Handle fetch responses
  */

@@ -4,9 +4,15 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getDashboardStats } from "../utils/api";
 
+import { getUserFromToken } from "../utils/api"; // 👈 ADD THIS
+
 function Dashboard() {
   const navigate = useNavigate();
-  const isAuthenticated = localStorage.getItem("authToken");
+  const user = getUserFromToken(); // ✅ FIRST
+  const isAuthenticated = !!user; // ✅ THEN USE IT
+
+  const name = user?.sub || "User";
+  const role = user?.role || "";
 
   const [stats, setStats] = useState({
     totalStudents: 0,
@@ -18,8 +24,25 @@ function Dashboard() {
     localStorage.removeItem("authToken");
     navigate("/login");
   };
+  const getGreeting = () => {
+    const hour = new Date().getHours();
 
-  useEffect(() => {
+    if (hour < 12) return "Good Morning ☀️";
+    if (hour < 18) return "Good Afternoon 🌤️";
+    return "Good Evening 🌙";
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase();
+  };
+
+    useEffect(() => {
     const loadStats = async () => {
       try {
         const data = await getDashboardStats();
@@ -37,6 +60,7 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+ 
   if (!isAuthenticated) {
     return (
       <div style={styles.container}>
@@ -49,43 +73,114 @@ function Dashboard() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>🎓 Smart Attendance Dashboard</h1>
+      <div style={styles.header}>
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          {/* Avatar */}
+          <div style={styles.avatar}>{getInitials(name)}</div>
+
+          {/* Text */}
+          <div>
+            <h1 style={styles.title}>
+              K.H.KABBUR INSTITUTE OF ENGINEERING DHARWAD
+            </h1>
+
+            <p style={styles.subtitle}>
+              {getGreeting()}, {name} ({role?.replace("ROLE_", "")})
+            </p>
+          </div>
+        </div>
+
+        <p style={styles.subtitle}>{new Date().toLocaleString()}</p>
+      </div>
 
       <div style={styles.stats}>
-        <div style={styles.card}>
-          <h3>Total Students</h3>
+        <div
+          style={styles.card}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.transform = "translateY(0) scale(1)")
+          }
+        >
+          <p style={styles.cardTitle}>Total Students</p>
           <p style={styles.number}>{stats.totalStudents}</p>
         </div>
 
-        <div style={styles.card}>
-          <h3>Today's Attendance</h3>
+        <div
+          style={styles.card}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.transform = "translateY(0) scale(1)")
+          }
+        >
+          <p style={styles.cardTitle}>Today's Attendance</p>
           <p style={styles.number}>{stats.todayAttendance}</p>
         </div>
 
-        <div style={styles.card}>
-          <h3>System Status</h3>
+        <div
+          style={styles.card}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.transform = "translateY(0) scale(1)")
+          }
+        >
+          <p style={styles.cardTitle}>System Status</p>
           <p style={styles.status}>🟢 {stats.systemStatus}</p>
         </div>
       </div>
 
       <div style={styles.actions}>
-        <Link
-          to="/attendance-table"
-          style={{ ...styles.actionCard, ...styles.view }}
-        >
-          📋 View Attendance
-        </Link>
+        {(role === "ROLE_ADMIN" || role === "ROLE_TEACHER") && (
+          <Link
+            to="/attendance-table"
+            style={{ ...styles.actionCard, ...styles.view }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.transform = "translateY(0) scale(1)")
+            }
+          >
+            📋 View Attendance
+          </Link>
+        )}
 
-        <Link
-          to="/add_student"
-          style={{ ...styles.actionCard, ...styles.enroll }}
-        >
-          ➕ Enroll Student
-        </Link>
+        {role === "ROLE_ADMIN" && (
+          <Link
+            to="/add_student"
+            style={{ ...styles.actionCard, ...styles.enroll }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.transform = "translateY(0) scale(1)")
+            }
+          >
+            ➕ Enroll Student
+          </Link>
+        )}
 
-        <Link to="/face" style={{ ...styles.actionCard, ...styles.kiosk }}>
-          📷 Start Face Recognition
-        </Link>
+        {(role === "ROLE_ADMIN" ||
+          role === "ROLE_TEACHER" ||
+          role === "ROLE_STAFF") && (
+          <Link
+            to="/face"
+            style={{ ...styles.actionCard, ...styles.kiosk }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.transform = "translateY(0) scale(1)")
+            }
+          >
+            📷 Start Face Recognition
+          </Link>
+        )}
       </div>
 
       <div style={styles.footer}>
@@ -106,84 +201,103 @@ export default Dashboard;
 const styles = {
   container: {
     padding: "40px",
-    fontFamily: "Arial, sans-serif",
-    background: "#f4f6f9",
+    fontFamily: "Inter, sans-serif",
+    background: "#f8fafc",
     minHeight: "100vh",
   },
 
-  title: {
-    marginBottom: "30px",
-    color: "#1e293b",
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "40px",
+  },
+
+  userInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+  },
+
+  greeting: {
+    margin: 0,
+    fontSize: "22px",
+    fontWeight: "600",
+  },
+
+  roleBadge: {
+    background: "#e0f2fe",
+    padding: "4px 10px",
+    borderRadius: "20px",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#0369a1",
+  },
+
+  time: {
+    color: "#64748b",
+    fontSize: "14px",
+  },
+
+  avatar: {
+    width: "55px",
+    height: "55px",
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+    color: "white",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "700",
+    fontSize: "18px",
   },
 
   stats: {
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "20px",
     marginBottom: "40px",
   },
 
   card: {
-    flex: 1,
     background: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-  },
-
-  number: {
-    fontSize: "28px",
-    fontWeight: "bold",
-    marginTop: "10px",
-  },
-
-  status: {
-    fontSize: "20px",
-    marginTop: "10px",
+    padding: "25px",
+    borderRadius: "14px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+    transition: "0.3s",
   },
 
   actions: {
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
     gap: "20px",
-    marginBottom: "40px",
   },
 
   actionCard: {
-    flex: 1,
-    padding: "25px",
-    textAlign: "center",
-    borderRadius: "10px",
-    textDecoration: "none",
-    fontWeight: "bold",
-    color: "white",
-    transition: "transform 0.2s ease",
-  },
-
-  view: {
+    padding: "20px",
+    borderRadius: "12px",
     background: "#3b82f6",
-  },
-
-  enroll: {
-    background: "#10b981",
-  },
-
-  kiosk: {
-    background: "#6366f1",
-  },
-
-  footer: {
-    marginBottom: "20px",
-  },
-
-  logout: {
-    padding: "10px 20px",
-    border: "none",
-    background: "#ef4444",
     color: "white",
-    borderRadius: "6px",
-    cursor: "pointer",
+    textAlign: "center",
+    textDecoration: "none",
+    fontWeight: "600",
   },
 
-  note: {
-    color: "#555",
+  actionCardGreen: {
+    padding: "20px",
+    borderRadius: "12px",
+    background: "#10b981",
+    color: "white",
+    textAlign: "center",
+    textDecoration: "none",
   },
-};
+
+  actionCardPurple: {
+    padding: "20px",
+    borderRadius: "12px",
+    background: "#6366f1",
+    color: "white",
+    textAlign: "center",
+    textDecoration: "none",
+  },
+}; 
