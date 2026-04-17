@@ -6,21 +6,23 @@ module.exports = {
     configure: (webpackConfig) => {
       webpackConfig.resolve = webpackConfig.resolve || {};
 
+      // 👉 Disable ALL Node core modules
       webpackConfig.resolve.fallback = {
         ...(webpackConfig.resolve.fallback || {}),
         fs: false,
         path: false,
         os: false,
-        crypto: require.resolve('crypto-browserify'),
-        stream: require.resolve('stream-browserify'),
-        util: require.resolve('util/'),
-        buffer: require.resolve('buffer/')
+        crypto: false,
+        stream: false,
+        util: false,
+        buffer: false,
+        vm: false,
       };
 
+      // Minimal globals (safe for browser)
       webpackConfig.plugins = (webpackConfig.plugins || []).concat([
         new webpack.ProvidePlugin({
           process: 'process/browser',
-          Buffer: ['buffer', 'Buffer'],
         }),
       ]);
 
