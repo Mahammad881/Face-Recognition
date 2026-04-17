@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import * as faceapi from "face-api.js";
+import * as faceapi from "face-api.js/dist/face-api.min.js";
 import { enrollStudent } from "../utils/api";
 import { useNavigate } from "react-router-dom";
 

@@ -17,12 +17,11 @@
     "socket.io-client": "^4.8.3",
     "web-vitals": "^3.5.0"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+"scripts": {
+  "start": "craco start",
+  "build": "craco build",
+  "test": "craco test"
+},
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -40,5 +39,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0"
   }
 }
