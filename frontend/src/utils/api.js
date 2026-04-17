@@ -57,7 +57,7 @@ const getAuthHeader = () => {
 // ==============================
 
 export const loginUser = async (credentials) => {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export const loginUser = async (credentials) => {
 
 
 export const getDashboardStats = async () => {
-  const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
+  const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
     headers: {
       "Content-Type": "application/json",
       ...getAuthHeader(), // ✅ add back
@@ -90,7 +90,7 @@ export const getDashboardStats = async () => {
 // ==============================
 
 export const getStudentDescriptors = async () => {
-  const response = await fetch(`${API_BASE_URL}/students/descriptors`, {
+  const response = await fetch(`${API_BASE_URL}/api/students/descriptors`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -106,7 +106,7 @@ export const enrollStudent = async (studentData) => {
 
   // 1. Save student (basic info)
   await handleResponse(
-    await fetch(`${API_BASE_URL}/students`, {
+    await fetch(`${API_BASE_URL}/api/students`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -123,7 +123,7 @@ export const enrollStudent = async (studentData) => {
 
   // 2. Save face separately
   await handleResponse(
-    await fetch(`${API_BASE_URL}/student_faces`, {
+    await fetch(`${API_BASE_URL}/api/student_faces`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -142,7 +142,7 @@ export const enrollStudent = async (studentData) => {
 // ==============================
 
 export const markPresent = async (studentId) => {
-  const response = await fetch(`${API_BASE_URL}/attendance/present`, { // ✅ FIXED
+  const response = await fetch(`${API_BASE_URL}/api/attendance/present`, { // ✅ FIXED
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -156,7 +156,7 @@ export const markPresent = async (studentId) => {
 
 
 export const getAttendanceRecords = async () => {
-  const response = await fetch(`${API_BASE_URL}/attendance`, {
+  const response = await fetch(`${API_BASE_URL}/api/attendance`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -167,7 +167,7 @@ export const getAttendanceRecords = async () => {
   return handleResponse(response);
 };
 export const deleteAttendanceRecord = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/api/attendance/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -179,7 +179,7 @@ export const deleteAttendanceRecord = async (id) => {
 };
 
 export const updateAttendanceRecord = async (id, data) => {
-  const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/api/attendance/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
