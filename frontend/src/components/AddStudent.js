@@ -141,23 +141,22 @@ function AddStudent() {
   };
 
   return (
-    <div style={styles.page}>
+    <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.title}>🎓 Enroll Student</h2>
-        <p style={styles.status(message)}>{message}</p>
+        <h2 style={styles.title}>Enroll New Student</h2>
+
+        {message && <p style={styles.status(message)}>Status: {message}</p>}
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          {/* BASIC INFO */}
-          <div style={styles.section}>
-            <h4>Student Details</h4>
-
+          {/* INPUTS */}
+          <div style={styles.inputGroup}>
             <input
               type="text"
               placeholder="Student ID"
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              style={styles.input}
               required
+              style={styles.input}
             />
 
             <input
@@ -165,8 +164,8 @@ function AddStudent() {
               placeholder="Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={styles.input}
               required
+              style={styles.input}
             />
 
             <input
@@ -174,8 +173,8 @@ function AddStudent() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
               required
+              style={styles.input}
             />
 
             <input
@@ -183,16 +182,22 @@ function AddStudent() {
               placeholder="Department"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              style={styles.input}
               required
+              style={styles.input}
             />
           </div>
 
-          {/* CAMERA */}
+          {/* CAMERA SECTION */}
           <div style={styles.section}>
-            <h4>Face Capture</h4>
+            <p style={styles.step}>1. Position your face</p>
 
-            <video ref={videoRef} autoPlay muted style={styles.video} />
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={styles.video}
+            />
 
             <button
               type="button"
@@ -204,14 +209,24 @@ function AddStudent() {
             >
               📸 Capture Face
             </button>
+
+            {descriptor && (
+              <p style={styles.success}>✅ Face captured successfully</p>
+            )}
           </div>
 
           {/* SUBMIT */}
           <div style={styles.section}>
+            <p style={styles.step}>2. Save Student</p>
+
             <button
               type="submit"
               disabled={!descriptor}
-              style={styles.primaryBtn}
+              style={{
+                ...styles.primaryBtn,
+                opacity: !descriptor ? 0.6 : 1,
+                cursor: !descriptor ? "not-allowed" : "pointer",
+              }}
             >
               🚀 Enroll Student
             </button>
@@ -221,6 +236,102 @@ function AddStudent() {
     </div>
   );
 }
+const styles = {
+  container: {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#f4f6f9",
+    padding: "20px",
+  },
 
+  card: {
+    width: "100%",
+    maxWidth: "500px",
+    background: "#fff",
+    padding: "25px",
+    borderRadius: "10px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+  },
 
+  title: {
+    textAlign: "center",
+    marginBottom: "15px",
+  },
+
+  status: (msg) => ({
+    textAlign: "center",
+    marginBottom: "15px",
+    padding: "10px",
+    borderRadius: "6px",
+    fontWeight: "500",
+    background: msg.startsWith("❌")
+      ? "#ffe5e5"
+      : msg.startsWith("✅")
+      ? "#e6ffed"
+      : "#e6f0ff",
+  }),
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
+
+  inputGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
+
+  input: {
+    padding: "10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+    fontSize: "14px",
+  },
+
+  section: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "10px",
+  },
+
+  step: {
+    fontWeight: "bold",
+    alignSelf: "flex-start",
+  },
+
+  video: {
+    width: "100%",
+    maxWidth: "350px",
+    borderRadius: "8px",
+    border: "2px solid #007bff",
+  },
+
+  primaryBtn: {
+    width: "100%",
+    padding: "12px",
+    background: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    fontWeight: "bold",
+  },
+
+  secondaryBtn: {
+    padding: "10px 15px",
+    background: "#f1f1f1",
+    border: "1px solid #ccc",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+
+  success: {
+    color: "green",
+    fontWeight: "500",
+  },
+};
 export default AddStudent;
