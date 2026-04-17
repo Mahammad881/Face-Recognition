@@ -1,6 +1,5 @@
 // frontend/src/utils/api.js
 
-
 const API_BASE_URL = "https://face-recognition-q7ah.onrender.com";
 
 // TOKEN UTILS
@@ -45,7 +44,7 @@ const getAuthHeader = () => {
   const token = localStorage.getItem("authToken"); // ✅ FIXED
 
   if (!token) {
-    throw new Error("User not authenticated. Please login.");
+    return {}; // ✅ don't break request
   }
 
   return {
@@ -71,8 +70,6 @@ export const loginUser = async (credentials) => {
 // ==============================
 // DASHBOARD
 // ==============================
-
-
 
 export const getDashboardStats = async () => {
   const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
@@ -118,7 +115,7 @@ export const enrollStudent = async (studentData) => {
         email,
         department,
       }),
-    })
+    }),
   );
 
   // 2. Save face separately
@@ -133,7 +130,7 @@ export const enrollStudent = async (studentData) => {
         studentId,
         faceDescriptor,
       }),
-    })
+    }),
   );
 };
 
@@ -142,18 +139,17 @@ export const enrollStudent = async (studentData) => {
 // ==============================
 
 export const markPresent = async (studentId) => {
-  const response = await fetch(`${API_BASE_URL}/api/attendance/present`, { // ✅ FIXED
+  const response = await fetch(`${API_BASE_URL}/api/attendance/present`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // ...getAuthHeader(), (optional remove for now)
+      ...getAuthHeader(), // ✅ ADD THIS BACK
     },
     body: JSON.stringify({ studentId }),
   });
 
   return handleResponse(response);
 };
-
 
 export const getAttendanceRecords = async () => {
   const response = await fetch(`${API_BASE_URL}/api/attendance`, {
