@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/student_faces")
-@CrossOrigin(origins = "http://localhost:3000")
 public class StudentFaceController {
 
     private final StudentFaceService studentFaceService;
