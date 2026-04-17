@@ -9,19 +9,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-   @Bean
+  @Bean
 public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .csrf(csrf -> csrf.disable())
-        .cors(cors -> {}) // ✅ keep this
+        .cors(cors -> {}) 
 
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/**").permitAll() // ✅ explicitly allow
-        )
-
-        // ✅ VERY IMPORTANT: allow OPTIONS
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+            .requestMatchers("/api/auth/**").permitAll()   // ✅ allow login/register
+            .anyRequest().authenticated()                  // 🔒 protect others
         )
 
         .formLogin(form -> form.disable())
@@ -29,6 +26,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
     return http.build();
 }
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
