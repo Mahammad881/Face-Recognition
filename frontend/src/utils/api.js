@@ -1,7 +1,7 @@
 // frontend/src/utils/api.js
 
 
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = "https://face-recognition-q7ah.onrender.com";
 
 // TOKEN UTILS
 // ==============================
