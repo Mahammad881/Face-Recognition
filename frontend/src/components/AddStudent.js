@@ -237,14 +237,14 @@ function AddStudent() {
   );
 }
 const styles = {
-  container: {
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f4f6f9",
-    padding: "20px",
-  },
+container: {
+  minHeight: "100vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  background: "linear-gradient(135deg, #667eea, #764ba2)", // ✅ same as dashboard vibe
+  padding: "20px",
+},
 
   card: {
     width: "100%",
