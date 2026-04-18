@@ -242,7 +242,7 @@ container: {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  background: "linear-gradient(135deg, #667eea, #764ba2)", // ✅ same as dashboard vibe
+  background: "#f8fafc", // ✅ SAME AS DASHBOARD
   padding: "20px",
 },
 
