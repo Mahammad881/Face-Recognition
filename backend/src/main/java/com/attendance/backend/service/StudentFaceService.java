@@ -19,60 +19,70 @@ public class StudentFaceService {
 
     public StudentFace saveFace(StudentFace face) {
 
-    String studentId = face.getStudentId();
+        String studentId = face.getStudentId();
 
-    if (studentId != null) {
-        studentId = studentId.trim().toUpperCase();
+        if (studentId != null) {
+            studentId = studentId.trim().toUpperCase();
 
-        // 🔥 REMOVE PREFIX NUMBERS (IMPORTANT)
-        studentId = studentId.replaceAll("^[0-9]+", "");
+            // 🔥 REMOVE PREFIX NUMBERS (IMPORTANT)
+            studentId = studentId.replaceAll("^[0-9]+", "");
 
-        face.setStudentId(studentId);
+            face.setStudentId(studentId);
+        }
+
+        face.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+
+        return studentFaceRepository.save(face);
     }
-
-    face.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
-
-    return studentFaceRepository.save(face);
-}
 
     public List<StudentFace> getAllFaces() {
         return studentFaceRepository.findAll();
     }
 
     // 🔥 MATCH FACE
-    public String matchFace(List<Double> inputDescriptor) {
+   public String matchFace(List<Double> inputDescriptor) {
 
-        List<StudentFace> faces = studentFaceRepository.findAll();
+    List<StudentFace> faces = studentFaceRepository.findAll();
 
-        double threshold = 0.75;
+    double threshold = 0.45; // ✅ match frontend
 
-        for (StudentFace face : faces) {
+    for (StudentFace face : faces) {
 
-            List<Double> dbDescriptor = convertJsonToList(face.getFaceDescriptor());
+        try {
+            List<List<Double>> dbDescriptors =
+                    convertJsonToListOfLists(face.getFaceDescriptor());
 
-            // ✅ IMPORTANT FIX
-            if (dbDescriptor.size() != inputDescriptor.size()) {
-                continue;
+            for (List<Double> dbDescriptor : dbDescriptors) {
+
+                if (dbDescriptor.size() != inputDescriptor.size()) {
+                    continue;
+                }
+
+                double distance = calculateDistance(inputDescriptor, dbDescriptor);
+
+                if (distance < threshold) {
+                    return face.getStudentId();
+                }
             }
 
-            double distance = calculateDistance(inputDescriptor, dbDescriptor);
-
-            if (distance < threshold) {
-                return face.getStudentId();
-            }
+        } catch (Exception e) {
+            // skip bad data
+            continue;
         }
-
-        return null;
     }
 
+    return null;
+}
+
     // 🧮 Convert JSON String → List<Double>
-    private List<Double> convertJsonToList(String json) {
+
+    private List<List<Double>> convertJsonToListOfLists(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(json, new TypeReference<List<Double>>() {
+            return mapper.readValue(json, new TypeReference<List<List<Double>>>() {
             });
         } catch (Exception e) {
-            throw new RuntimeException("Error converting JSON to List", e);
+            throw new RuntimeException("Error converting JSON", e);
         }
     }
 

@@ -127,7 +127,10 @@ function AddStudent() {
     try {
       await enrollStudent({
         studentId: studentId.trim(),
-        faceDescriptor: JSON.stringify(descriptor[0]),
+        name,
+        email,
+        department,
+        faceDescriptor: JSON.stringify(descriptor)
       });
 
       setMessage(`✅ Student Enrolled Successfully (${name})`);

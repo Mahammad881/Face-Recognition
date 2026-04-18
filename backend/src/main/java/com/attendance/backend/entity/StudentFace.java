@@ -17,7 +17,7 @@ public class StudentFace {
     @Column(name = "student_id")
     private String studentId;
 
-    @Column(name = "face_descriptor", columnDefinition = "TEXT")
+    @Column(name = "face_descriptor", columnDefinition = "JSON")
     private String faceDescriptor;
 
     @Column(name = "created_at")
