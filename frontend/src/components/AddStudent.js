@@ -113,6 +113,14 @@ function AddStudent() {
       setMessage("Please capture a face first.");
       return;
     }
+    // ✅ ADD HERE
+    console.log("DATA:", {
+      studentId,
+      name,
+      email,
+      department,
+      descriptor,
+    });
 
     setMessage("Sending data to backend for enrollment...");
 
@@ -122,7 +130,7 @@ function AddStudent() {
         name: name.trim(),
         email: email.trim(), // ✅ NEW
         department: department.trim(), // ✅ NEW
-        faceDescriptor: JSON.stringify(descriptor),
+        faceDescriptor: descriptor[0] // ✅ FIXED
       });
 
       setMessage(`✅ Student Enrolled Successfully (${name})`);
@@ -237,14 +245,14 @@ function AddStudent() {
   );
 }
 const styles = {
-container: {
-  minHeight: "100vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  background: "#f8fafc", // ✅ SAME AS DASHBOARD
-  padding: "20px",
-},
+  container: {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#f8fafc", // ✅ SAME AS DASHBOARD
+    padding: "20px",
+  },
 
   card: {
     width: "100%",
@@ -269,8 +277,8 @@ container: {
     background: msg.startsWith("❌")
       ? "#ffe5e5"
       : msg.startsWith("✅")
-      ? "#e6ffed"
-      : "#e6f0ff",
+        ? "#e6ffed"
+        : "#e6f0ff",
   }),
 
   form: {
