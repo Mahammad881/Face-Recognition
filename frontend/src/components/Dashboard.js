@@ -42,7 +42,7 @@ function Dashboard() {
       .toUpperCase();
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const loadStats = async () => {
       try {
         const data = await getDashboardStats();
@@ -60,7 +60,6 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
- 
   if (!isAuthenticated) {
     return (
       <div style={styles.container}>
@@ -300,4 +299,19 @@ const styles = {
     textAlign: "center",
     textDecoration: "none",
   },
-}; 
+
+  logout: {
+    padding: "12px 25px",
+    background: "#ef4444",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  footer: {
+    marginTop: "40px",
+    display: "flex",
+    justifyContent: "center",
+  },
+};
