@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import * as faceapi from "face-api.js/dist/face-api.min.js";
 import { enrollStudent } from "../utils/api";
-import { useNavigate } from "react-router-dom";
 
 const MODEL_PATH = "/models";
 
@@ -19,7 +18,6 @@ function AddStudent() {
   const [message, setMessage] = useState("");
   const [loadingModels, setLoadingModels] = useState(true);
 
-  const navigate = useNavigate();
 
   useEffect(() => {
     let currentStream;
