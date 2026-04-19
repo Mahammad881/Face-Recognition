@@ -16,50 +16,72 @@ function Navbar() {
 
   return (
     <nav style={styles.navbar}>
-     
-      <div style={styles.logo}>
-        🎓 Smart Attendance
-      </div>
-
+      <div style={styles.logo}>🎓 Smart Attendance</div>
       <div style={styles.links}>
-
-        {(role === "ROLE_ADMIN" || role === "ROLE_TEACHER" || role === "ROLE_STAFF") && (
-          <NavLink to="/face" style={styles.link}>
+        {(role === "ROLE_ADMIN" ||
+          role === "ROLE_TEACHER" ||
+          role === "ROLE_STAFF") && (
+          <NavLink
+            to="/face"
+            style={({ isActive }) => ({
+              ...styles.link,
+              color: isActive ? "#6366f1" : "#334155",
+              borderBottom: isActive ? "2px solid #6366f1" : "none",
+            })}
+          >
             Face Recognition
           </NavLink>
         )}
 
-        {(role === "ROLE_ADMIN" || role === "ROLE_TEACHER"|| role === "ROLE_STAFF" ) && (
-          <NavLink to="/dashboard" style={styles.link}>
+        {(role === "ROLE_ADMIN" ||
+          role === "ROLE_TEACHER" ||
+          role === "ROLE_STAFF") && (
+          <NavLink
+            to="/dashboard"
+            style={({ isActive }) => ({
+              ...styles.link,
+              color: isActive ? "#6366f1" : "#334155",
+              borderBottom: isActive ? "2px solid #6366f1" : "none",
+            })}
+          >
             Dashboard
           </NavLink>
         )}
 
         {role === "ROLE_ADMIN" && (
-          <NavLink to="/add_student" style={styles.link}>
+          <NavLink
+            to="/add_student"
+            style={({ isActive }) => ({
+              ...styles.link,
+              color: isActive ? "#6366f1" : "#334155",
+              borderBottom: isActive ? "2px solid #6366f1" : "none",
+            })}
+          >
             Add Student
           </NavLink>
         )}
 
         {(role === "ROLE_ADMIN" || role === "ROLE_TEACHER") && (
-          <NavLink to="/attendance-table" style={styles.link}>
+          <NavLink
+            to="/attendance-table"
+            style={({ isActive }) => ({
+              ...styles.link,
+              color: isActive ? "#6366f1" : "#334155",
+              borderBottom: isActive ? "2px solid #6366f1" : "none",
+            })}
+          >
             Attendance Table
           </NavLink>
         )}
-
       </div>
-
       {/* RIGHT SIDE */}
       <div style={styles.rightSection}>
-        <span style={styles.role}>
-          {role ? role.replace("ROLE_", "") : ""}
-        </span>
+        <span style={styles.role}>{role ? role.replace("ROLE_", "") : ""}</span>
 
         <button onClick={handleLogout} style={styles.logout}>
           Logout
         </button>
       </div>
-
     </nav>
   );
 }
@@ -74,14 +96,17 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "12px 40px",
-    background: "white",
+    background: "rgba(255,255,255,0.7)",
+    backdropFilter: "blur(10px)",
     borderBottom: "1px solid #e2e8f0",
   },
 
   logo: {
     fontWeight: "700",
-    fontSize: "18px",
-    color: "#0f172a",
+    fontSize: "20px",
+    background: "linear-gradient(90deg,#6366f1,#4f46e5)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
   },
 
   links: {
@@ -93,6 +118,9 @@ const styles = {
     textDecoration: "none",
     color: "#334155",
     fontWeight: "500",
+    paddingBottom: "4px",
+    transition: "all 0.2s ease",
+    cursor: "pointer",
   },
 
   rightSection: {
@@ -113,9 +141,10 @@ const styles = {
   logout: {
     padding: "6px 14px",
     border: "none",
-    background: "#ef4444",
+    background: "linear-gradient(90deg,#ef4444,#dc2626)",
     color: "white",
     borderRadius: "6px",
     cursor: "pointer",
+    fontWeight: "600",
   },
 };
