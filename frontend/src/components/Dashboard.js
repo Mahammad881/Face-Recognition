@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getDashboardStats } from "../utils/api";
 
-import { getUserFromToken } from "../utils/api"; // 👈 ADD THIS
+import { getUserFromToken } from "../utils/api";
+import { applyThemeToBody } from "../utils/theme"; // 👈 ADD THIS
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -59,6 +60,24 @@ function Dashboard() {
 
     return () => clearInterval(interval);
   }, []);
+  const getCardStyle = (dark) => ({
+    ...styles.card,
+    background: dark ? "#1e293b" : "rgba(255,255,255,0.7)",
+    color: dark ? "#fff" : "#000",
+  });
+
+  useEffect(() => {
+    const applyTheme = () => {
+      const savedTheme = localStorage.getItem("theme") === "dark";
+      setDark(savedTheme);
+      applyThemeToBody(savedTheme);
+    };
+
+    applyTheme();
+    window.addEventListener("themeChange", applyTheme);
+
+    return () => window.removeEventListener("themeChange", applyTheme);
+  }, []);
 
   if (!isAuthenticated) {
     return (
@@ -82,6 +101,16 @@ function Dashboard() {
     >
       <div style={styles.header}>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          <p
+            style={{
+              ...styles.cardTitle,
+              color: dark ? "#cbd5f5" : "#64748b",
+            }}
+          >
+            {new Date().toLocaleString()}
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           {/* Avatar */}
           <div style={styles.avatar}>{getInitials(name)}</div>
 
@@ -91,34 +120,37 @@ function Dashboard() {
               K.H.KABBUR INSTITUTE OF ENGINEERING DHARWAD
             </h1>
 
-            <p style={styles.subtitle}>
+            <p
+              style={{
+                ...styles.cardTitle,
+                color: dark ? "#cbd5f5" : "#64748b",
+              }}
+            >
               {getGreeting()}, {name} ({role?.replace("ROLE_", "")})
             </p>
           </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          <p style={styles.subtitle}>{new Date().toLocaleString()}</p>
-
-          <button
-            onClick={() => setDark(!dark)}
+          <p
             style={{
-              padding: "6px 12px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              background: dark ? "#1e293b" : "#e2e8f0",
-              color: dark ? "#fff" : "#000",
+              ...styles.cardTitle,
+              color: dark ? "#cbd5f5" : "#64748b",
             }}
           >
-            {dark ? "☀️ Light" : "🌙 Dark"}
-          </button>
+            {new Date().toLocaleString()}
+          </p>
         </div>
       </div>
 
       <div style={styles.stats}>
         <div
-          style={styles.card}
+          style={{
+            ...getCardStyle(dark),
+            display: "flex",
+            gap: "15px",
+            flexWrap: "wrap",
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateY(-8px)";
             e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
@@ -133,7 +165,12 @@ function Dashboard() {
         </div>
 
         <div
-          style={styles.card}
+          style={{
+            ...getCardStyle(dark),
+            display: "flex",
+            gap: "15px",
+            flexWrap: "wrap",
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateY(-8px)";
             e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
@@ -148,7 +185,12 @@ function Dashboard() {
         </div>
 
         <div
-          style={styles.card}
+          style={{
+            ...getCardStyle(dark),
+            display: "flex",
+            gap: "15px",
+            flexWrap: "wrap",
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateY(-8px)";
             e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
@@ -163,7 +205,14 @@ function Dashboard() {
         </div>
       </div>
 
-      <div style={styles.actions}>
+      <div
+        style={{
+          ...getCardStyle(dark),
+          display: "flex",
+          gap: "15px",
+          flexWrap: "wrap",
+        }}
+      >
         {(role === "ROLE_ADMIN" || role === "ROLE_TEACHER") && (
           <Link
             to="/attendance-table"
@@ -234,7 +283,7 @@ function Dashboard() {
 export default Dashboard;
 
 const styles = {
- container: {
+  container: {
     padding: "40px",
     fontFamily: "Inter, sans-serif",
     minHeight: "100vh",
@@ -369,5 +418,33 @@ const styles = {
 
   kiosk: {
     background: "#6366f1", // purple
+  },
+  title: {
+    fontSize: "28px",
+    fontWeight: "700",
+    margin: 0,
+  },
+
+  subtitle: {
+    fontSize: "14px",
+  },
+  cardTitle: {
+    fontSize: "14px",
+    color: "#64748b",
+  },
+
+  number: {
+    fontSize: "26px",
+    fontWeight: "700",
+  },
+
+  status: {
+    fontSize: "16px",
+    fontWeight: "600",
+  },
+
+  note: {
+    marginTop: "20px",
+    fontSize: "14px",
   },
 };

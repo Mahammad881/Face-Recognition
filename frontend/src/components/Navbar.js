@@ -1,10 +1,38 @@
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { applyThemeToBody } from "../utils/theme";
 
 function Navbar() {
   const navigate = useNavigate();
 
   const role = localStorage.getItem("role");
   const isAuthenticated = localStorage.getItem("authToken");
+
+  const [dark, setDark] = useState(false);
+  const toggleTheme = () => {
+    const newTheme =
+      localStorage.getItem("theme") === "dark" ? "light" : "dark";
+
+    localStorage.setItem("theme", newTheme);
+
+    const isDark = newTheme === "dark";
+    applyThemeToBody(isDark);
+
+    window.dispatchEvent(new Event("themeChange"));
+  };
+
+  useEffect(() => {
+    const applyTheme = () => {
+      const savedTheme = localStorage.getItem("theme") === "dark";
+      setDark(savedTheme);
+      applyThemeToBody(savedTheme);
+    };
+
+    applyTheme();
+    window.addEventListener("themeChange", applyTheme);
+
+    return () => window.removeEventListener("themeChange", applyTheme);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -15,7 +43,12 @@ function Navbar() {
   if (!isAuthenticated) return null;
 
   return (
-    <nav style={styles.navbar}>
+    <nav
+      style={{
+        ...styles.navbar,
+        background: dark ? "#1e293b" : "rgba(255,255,255,0.7)",
+      }}
+    >
       <div style={styles.logo}>🎓 Smart Attendance</div>
       <div style={styles.links}>
         {(role === "ROLE_ADMIN" ||
@@ -25,8 +58,18 @@ function Navbar() {
             to="/face"
             style={({ isActive }) => ({
               ...styles.link,
-              color: isActive ? "#6366f1" : "#334155",
-              borderBottom: isActive ? "2px solid #6366f1" : "none",
+
+              color: dark
+                ? isActive
+                  ? "#818cf8"
+                  : "#cbd5f5"
+                : isActive
+                  ? "#6366f1"
+                  : "#334155",
+
+              borderBottom: isActive
+                ? `2px solid ${dark ? "#818cf8" : "#6366f1"}`
+                : "none",
             })}
           >
             Face Recognition
@@ -40,8 +83,18 @@ function Navbar() {
             to="/dashboard"
             style={({ isActive }) => ({
               ...styles.link,
-              color: isActive ? "#6366f1" : "#334155",
-              borderBottom: isActive ? "2px solid #6366f1" : "none",
+
+              color: dark
+                ? isActive
+                  ? "#818cf8"
+                  : "#cbd5f5"
+                : isActive
+                  ? "#6366f1"
+                  : "#334155",
+
+              borderBottom: isActive
+                ? `2px solid ${dark ? "#818cf8" : "#6366f1"}`
+                : "none",
             })}
           >
             Dashboard
@@ -53,8 +106,18 @@ function Navbar() {
             to="/add_student"
             style={({ isActive }) => ({
               ...styles.link,
-              color: isActive ? "#6366f1" : "#334155",
-              borderBottom: isActive ? "2px solid #6366f1" : "none",
+
+              color: dark
+                ? isActive
+                  ? "#818cf8"
+                  : "#cbd5f5"
+                : isActive
+                  ? "#6366f1"
+                  : "#334155",
+
+              borderBottom: isActive
+                ? `2px solid ${dark ? "#818cf8" : "#6366f1"}`
+                : "none",
             })}
           >
             Add Student
@@ -66,8 +129,18 @@ function Navbar() {
             to="/attendance-table"
             style={({ isActive }) => ({
               ...styles.link,
-              color: isActive ? "#6366f1" : "#334155",
-              borderBottom: isActive ? "2px solid #6366f1" : "none",
+
+              color: dark
+                ? isActive
+                  ? "#818cf8"
+                  : "#cbd5f5"
+                : isActive
+                  ? "#6366f1"
+                  : "#334155",
+
+              borderBottom: isActive
+                ? `2px solid ${dark ? "#818cf8" : "#6366f1"}`
+                : "none",
             })}
           >
             Attendance Table
@@ -76,6 +149,21 @@ function Navbar() {
       </div>
       {/* RIGHT SIDE */}
       <div style={styles.rightSection}>
+        {/* 🌙 Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            padding: "6px 12px",
+            borderRadius: "6px",
+            border: "none",
+            cursor: "pointer",
+            background: dark ? "#1e293b" : "#6366f1",
+            color: "#fff",
+            fontWeight: "600",
+          }}
+        >
+          {dark ? "☀️" : "🌙"}
+        </button>
         <span style={styles.role}>{role ? role.replace("ROLE_", "") : ""}</span>
 
         <button onClick={handleLogout} style={styles.logout}>
@@ -96,7 +184,6 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "12px 40px",
-    background: "rgba(255,255,255,0.7)",
     backdropFilter: "blur(10px)",
     borderBottom: "1px solid #e2e8f0",
   },
@@ -119,8 +206,7 @@ const styles = {
     color: "#334155",
     fontWeight: "500",
     paddingBottom: "4px",
-    transition: "all 0.2s ease",
-    cursor: "pointer",
+    transition: "0.3s",
   },
 
   rightSection: {
