@@ -30,7 +30,6 @@ function FaceRecognition() {
   const canvasRef = useRef(null);
   const [dark, setDark] = useState(false);
 
-
   useEffect(() => {
     const applyTheme = () => {
       let theme = localStorage.getItem("theme");
@@ -314,6 +313,13 @@ function FaceRecognition() {
       style={{
         background: dark ? "#0f172a" : "#f1f5f9",
         color: dark ? "#fff" : "#000",
+
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center", // 👈 CENTER horizontally
+        justifyContent: "center",
+        minHeight: "100vh", // 👈 FULL screen height
+        textAlign: "center",
       }}
     >
       <h2>🎓 Smart Attendance Kiosk</h2>
@@ -325,7 +331,13 @@ function FaceRecognition() {
       >
         {message}
       </p>
-      <div style={{ position: "relative", display: "inline-block" }}>
+      <div
+        style={{
+          position: "relative",
+          display: "inline-block",
+          marginTop: "20px", // 👈 spacing
+        }}
+      >
         <video
           ref={videoRef}
           autoPlay
