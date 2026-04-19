@@ -1,30 +1,21 @@
 // src/components/Dashboard.js
 
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { getDashboardStats } from "../utils/api";
 
 import { getUserFromToken } from "../utils/api";
 import { applyThemeToBody } from "../utils/theme"; // 👈 ADD THIS
 
 function Dashboard() {
-  const navigate = useNavigate();
   const user = getUserFromToken(); // ✅ FIRST
   const isAuthenticated = !!user; // ✅ THEN USE IT
 
   const name = user?.sub || "User";
   const role = user?.role || "";
 
-  const [stats, setStats] = useState({
-    totalStudents: 0,
-    todayAttendance: 0,
-    systemStatus: "Loading...",
-  });
+  const [stats, setStats] = useState(null);
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    navigate("/login");
-  };
   const getGreeting = () => {
     const hour = new Date().getHours();
 
@@ -32,7 +23,6 @@ function Dashboard() {
     if (hour < 18) return "Good Afternoon 🌤️";
     return "Good Evening 🌙";
   };
-
   const getInitials = (name) => {
     if (!name) return "U";
 
@@ -42,6 +32,16 @@ function Dashboard() {
       .join("")
       .toUpperCase();
   };
+
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const [dark, setDark] = useState(false);
   useEffect(() => {
     const loadStats = async () => {
@@ -60,6 +60,7 @@ function Dashboard() {
 
     return () => clearInterval(interval);
   }, []);
+
   const getCardStyle = (dark) => ({
     ...styles.card,
     background: dark ? "#1e293b" : "rgba(255,255,255,0.7)",
@@ -78,6 +79,16 @@ function Dashboard() {
 
     return () => window.removeEventListener("themeChange", applyTheme);
   }, []);
+
+  const handleHover = (e, enter) => {
+    if (enter) {
+      e.currentTarget.style.transform = "translateY(-8px)";
+      e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
+    } else {
+      e.currentTarget.style.transform = "translateY(0)";
+      e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -101,16 +112,6 @@ function Dashboard() {
     >
       <div style={styles.header}>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          <p
-            style={{
-              ...styles.cardTitle,
-              color: dark ? "#cbd5f5" : "#64748b",
-            }}
-          >
-            {new Date().toLocaleString()}
-          </p>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           {/* Avatar */}
           <div style={styles.avatar}>{getInitials(name)}</div>
 
@@ -122,8 +123,9 @@ function Dashboard() {
 
             <p
               style={{
-                ...styles.cardTitle,
-                color: dark ? "#cbd5f5" : "#64748b",
+                fontSize: "18px",
+                fontWeight: "600",
+                color: dark ? "#e0e7ff" : "#1e293b",
               }}
             >
               {getGreeting()}, {name} ({role?.replace("ROLE_", "")})
@@ -138,7 +140,7 @@ function Dashboard() {
               color: dark ? "#cbd5f5" : "#64748b",
             }}
           >
-            {new Date().toLocaleString()}
+            {time.toLocaleString()}
           </p>
         </div>
       </div>
@@ -148,83 +150,67 @@ function Dashboard() {
           style={{
             ...getCardStyle(dark),
             display: "flex",
-            gap: "15px",
-            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-8px)";
-            e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
-          }}
+          onMouseEnter={(e) => handleHover(e, true)}
+          onMouseLeave={(e) => handleHover(e, false)}
         >
           <p style={styles.cardTitle}>👨‍🎓 Total Students</p>
-          <p style={styles.number}>{stats.totalStudents}</p>
+          <p style={styles.number}>
+            {stats ? stats.totalStudents : "Loading..."}
+          </p>
         </div>
 
         <div
           style={{
             ...getCardStyle(dark),
             display: "flex",
-            gap: "15px",
-            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-8px)";
-            e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
-          }}
+          onMouseEnter={(e) => handleHover(e, true)}
+          onMouseLeave={(e) => handleHover(e, false)}
         >
           <p style={styles.cardTitle}>📅 Today's Attendance</p>
-          <p style={styles.number}>{stats.todayAttendance}</p>
+          <p style={styles.number}>
+            {stats ? stats.todayAttendance : "loading..."}
+          </p>
         </div>
 
         <div
           style={{
             ...getCardStyle(dark),
             display: "flex",
-            gap: "15px",
-            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-8px)";
-            e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
-          }}
+          onMouseEnter={(e) => handleHover(e, true)}
+          onMouseLeave={(e) => handleHover(e, false)}
         >
           <p style={styles.cardTitle}>⚙️ System Status</p>
-          <p style={styles.status}>🟢 {stats.systemStatus}</p>
+          <p style={styles.status}>
+            🟢 {stats ? stats.systemStatus : "Loading..."}
+          </p>
         </div>
       </div>
 
       <div
         style={{
           ...getCardStyle(dark),
+
           display: "flex",
-          gap: "15px",
           flexWrap: "wrap",
+          gap: "20px",
+          justifyContent: "center",
         }}
       >
         {(role === "ROLE_ADMIN" || role === "ROLE_TEACHER") && (
           <Link
             to="/attendance-table"
             style={{ ...styles.actionCard, ...styles.view }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-8px)";
-              e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
-            }}
+            onMouseEnter={(e) => handleHover(e, true)}
+            onMouseLeave={(e) => handleHover(e, false)}
           >
             📋 View Attendance
           </Link>
@@ -234,14 +220,8 @@ function Dashboard() {
           <Link
             to="/add_student"
             style={{ ...styles.actionCard, ...styles.enroll }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-8px)";
-              e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
-            }}
+            onMouseEnter={(e) => handleHover(e, true)}
+            onMouseLeave={(e) => handleHover(e, false)}
           >
             ➕ Enroll Student
           </Link>
@@ -253,29 +233,13 @@ function Dashboard() {
           <Link
             to="/face"
             style={{ ...styles.actionCard, ...styles.kiosk }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-8px)";
-              e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
-            }}
+            onMouseEnter={(e) => handleHover(e, true)}
+            onMouseLeave={(e) => handleHover(e, false)}
           >
             📷 Start Face Recognition
           </Link>
         )}
       </div>
-
-      <div style={styles.footer}>
-        <button onClick={handleLogout} style={styles.logout}>
-          🚪 Logout
-        </button>
-      </div>
-
-      <p style={styles.note}>
-        Attendance kiosk runs on the home page: <Link to="/">/ (Home)</Link>
-      </p>
     </div>
   );
 }
@@ -284,11 +248,10 @@ export default Dashboard;
 
 const styles = {
   container: {
-    padding: "40px",
-    fontFamily: "Inter, sans-serif",
+    padding: "20px",
+    width: "100%",
     minHeight: "100vh",
-    maxWidth: "1200px",
-    margin: "0 auto",
+    boxSizing: "border-box", // 👈 IMPORTANT
   },
 
   header: {
@@ -347,8 +310,8 @@ const styles = {
 
   stats: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "20px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: "25px",
     marginBottom: "40px",
   },
 
@@ -359,6 +322,7 @@ const styles = {
     borderRadius: "16px",
     boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
     transition: "0.3s",
+    cursor: "pointer",
   },
 
   actions: {
@@ -368,6 +332,7 @@ const styles = {
   },
 
   actionCard: {
+    flex: "1 1 200px", // 👈 ADD THIS
     padding: "18px",
     borderRadius: "14px",
     color: "white",
@@ -376,7 +341,6 @@ const styles = {
     fontWeight: "600",
     transition: "0.3s",
   },
-
   actionCardGreen: {
     padding: "20px",
     borderRadius: "12px",
@@ -393,21 +357,6 @@ const styles = {
     color: "white",
     textAlign: "center",
     textDecoration: "none",
-  },
-
-  logout: {
-    padding: "12px 25px",
-    background: "#ef4444",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    fontWeight: "600",
-    cursor: "pointer",
-  },
-  footer: {
-    marginTop: "40px",
-    display: "flex",
-    justifyContent: "center",
   },
   view: {
     background: "#3b82f6", // blue

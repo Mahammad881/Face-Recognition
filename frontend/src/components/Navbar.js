@@ -9,18 +9,16 @@ function Navbar() {
   const isAuthenticated = localStorage.getItem("authToken");
 
   const [dark, setDark] = useState(false);
+
   const toggleTheme = () => {
-    const newTheme =
-      localStorage.getItem("theme") === "dark" ? "light" : "dark";
+    const current = localStorage.getItem("theme") || "light";
+    const newTheme = current === "dark" ? "light" : "dark";
 
     localStorage.setItem("theme", newTheme);
-
-    const isDark = newTheme === "dark";
-    applyThemeToBody(isDark);
+    setDark(newTheme === "dark"); // 👈 instant UI update
 
     window.dispatchEvent(new Event("themeChange"));
   };
-
   useEffect(() => {
     const applyTheme = () => {
       const savedTheme = localStorage.getItem("theme") === "dark";

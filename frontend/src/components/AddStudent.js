@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
 import * as faceapi from "face-api.js/dist/face-api.min.js";
 import { enrollStudent } from "../utils/api";
+import { applyThemeToBody } from "../utils/theme";
 
 const MODEL_PATH = "/models";
 
 function AddStudent() {
   const videoRef = useRef(null);
-  
 
   const [studentId, setStudentId] = useState("");
   const [name, setName] = useState("");
@@ -17,7 +17,6 @@ function AddStudent() {
   const [descriptor, setDescriptor] = useState(null);
   const [message, setMessage] = useState("");
   const [loadingModels, setLoadingModels] = useState(true);
-
 
   useEffect(() => {
     let currentStream;
@@ -103,7 +102,21 @@ function AddStudent() {
     setDescriptor(descriptors);
     setMessage("✅ Multiple face samples captured!");
   };
+  const [dark, setDark] = useState(false);
+  const styles = getStyles(dark);
 
+  useEffect(() => {
+    const applyTheme = () => {
+      const savedTheme = localStorage.getItem("theme") === "dark";
+      setDark(savedTheme);
+      applyThemeToBody(savedTheme);
+    };
+
+    applyTheme();
+    window.addEventListener("themeChange", applyTheme);
+
+    return () => window.removeEventListener("themeChange", applyTheme);
+  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -128,7 +141,7 @@ function AddStudent() {
         name,
         email,
         department,
-        faceDescriptor: JSON.stringify(descriptor)
+        faceDescriptor: JSON.stringify(descriptor),
       });
 
       setMessage(`✅ Student Enrolled Successfully (${name})`);
@@ -242,20 +255,20 @@ function AddStudent() {
     </div>
   );
 }
-const styles = {
+const getStyles = (dark) => ({
   container: {
     minHeight: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#f8fafc", // ✅ SAME AS DASHBOARD
+    background: dark ? "#0f172a" : "#f8fafc", // ✅ FIX
     padding: "20px",
   },
-
   card: {
     width: "100%",
     maxWidth: "500px",
-    background: "#fff",
+    background: dark ? "#1e293b" : "#fff", // ✅ FIX
+    color: dark ? "#fff" : "#000", // ✅ IMPORTANT
     padding: "25px",
     borderRadius: "10px",
     boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
@@ -272,11 +285,17 @@ const styles = {
     padding: "10px",
     borderRadius: "6px",
     fontWeight: "500",
-    background: msg.startsWith("❌")
-      ? "#ffe5e5"
-      : msg.startsWith("✅")
-        ? "#e6ffed"
-        : "#e6f0ff",
+    background: dark
+      ? msg.startsWith("❌")
+        ? "#7f1d1d" // dark red
+        : msg.startsWith("✅")
+          ? "#14532d" // dark green
+          : "#1e3a8a" // dark blue
+      : msg.startsWith("❌")
+        ? "#ffe5e5"
+        : msg.startsWith("✅")
+          ? "#e6ffed"
+          : "#e6f0ff",
   }),
 
   form: {
@@ -294,8 +313,9 @@ const styles = {
   input: {
     padding: "10px",
     borderRadius: "6px",
-    border: "1px solid #ccc",
-    fontSize: "14px",
+    border: dark ? "1px solid #334155" : "1px solid #ccc", // ✅ FIX
+    background: dark ? "#0f172a" : "#fff", // ✅ FIX
+    color: dark ? "#fff" : "#000", // ✅ FIX
   },
 
   section: {
@@ -320,7 +340,7 @@ const styles = {
   primaryBtn: {
     width: "100%",
     padding: "12px",
-    background: "#007bff",
+    background: "#2563eb",
     color: "#fff",
     border: "none",
     borderRadius: "6px",
@@ -329,8 +349,9 @@ const styles = {
 
   secondaryBtn: {
     padding: "10px 15px",
-    background: "#f1f1f1",
-    border: "1px solid #ccc",
+    background: dark ? "#334155" : "#f1f1f1", // ✅ FIX
+    color: dark ? "#fff" : "#000",
+    border: "none",
     borderRadius: "6px",
     cursor: "pointer",
   },
@@ -339,5 +360,5 @@ const styles = {
     color: "green",
     fontWeight: "500",
   },
-};
+});
 export default AddStudent;

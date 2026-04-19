@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import * as faceapi from "face-api.js/dist/face-api.min.js";
 import { getStudentDescriptors, markPresent } from "../utils/api";
+import { applyThemeToBody } from "../utils/theme"; // 👈 ADD THIS
 const MODEL_PATH = "/models";
 const MIN_DISTANCE_THRESHOLD = 0.45;
 const DETECTION_INTERVAL = 500;
@@ -27,6 +28,29 @@ const getGreeting = () => {
 function FaceRecognition() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const [dark, setDark] = useState(false);
+
+
+  useEffect(() => {
+    const applyTheme = () => {
+      let theme = localStorage.getItem("theme");
+
+      // ✅ FIX: default theme
+      if (!theme) {
+        theme = "light";
+        localStorage.setItem("theme", "light");
+      }
+
+      const isDark = theme === "dark";
+      setDark(isDark);
+      applyThemeToBody(isDark);
+    };
+
+    applyTheme();
+    window.addEventListener("themeChange", applyTheme);
+
+    return () => window.removeEventListener("themeChange", applyTheme);
+  }, []);
   const [message, setMessage] = useState("⏳ Loading models...");
   const [faceMatcher, setFaceMatcher] = useState(null);
   const studentsRef = useRef([]);
@@ -35,12 +59,12 @@ function FaceRecognition() {
   const messageRef = useRef("");
   const noFaceCountRef = useRef(0);
   const speakingRef = useRef(false);
- 
+
   const [currentTime, setCurrentTime] = useState(Date.now());
   const currentTimeRef = useRef(currentTime);
 
   const PERIOD_START_TIME = useRef(
-    new Date(new Date().setMinutes(0, 0, 0)) // start of current hour
+    new Date(new Date().setMinutes(0, 0, 0)), // start of current hour
   );
   const speak = (text) => {
     if (speakingRef.current) return;
@@ -238,7 +262,6 @@ function FaceRecognition() {
                       );
                       setTimeout(() => speak(msg), 300);
                     } else if (res.status === "success") {
-                     
                       student.lastMarked = now;
 
                       const remainingTime = getRemainingPeriodTime(
@@ -285,10 +308,23 @@ function FaceRecognition() {
       clearInterval(intervalRef.current);
     };
   }, [faceMatcher]);
+
   return (
-    <div style={{ textAlign: "center", marginTop: "20px" }}>
+    <div
+      style={{
+        background: dark ? "#0f172a" : "#f1f5f9",
+        color: dark ? "#fff" : "#000",
+      }}
+    >
       <h2>🎓 Smart Attendance Kiosk</h2>
-      <p style={{ color: "#007bff", fontWeight: "bold" }}>{message}</p>
+      <p
+        style={{
+          color: dark ? "#60a5fa" : "#007bff",
+          fontWeight: "bold",
+        }}
+      >
+        {message}
+      </p>
       <div style={{ position: "relative", display: "inline-block" }}>
         <video
           ref={videoRef}
