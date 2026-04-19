@@ -41,7 +41,7 @@ function Dashboard() {
       .join("")
       .toUpperCase();
   };
-
+  const [dark, setDark] = useState(false);
   useEffect(() => {
     const loadStats = async () => {
       try {
@@ -71,7 +71,15 @@ function Dashboard() {
   }
 
   return (
-    <div style={styles.container}>
+    <div
+      style={{
+        ...styles.container,
+        background: dark
+          ? "#0f172a"
+          : "linear-gradient(135deg, #eef2ff, #f8fafc)",
+        color: dark ? "#fff" : "#000",
+      }}
+    >
       <div style={styles.header}>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           {/* Avatar */}
@@ -89,7 +97,23 @@ function Dashboard() {
           </div>
         </div>
 
-        <p style={styles.subtitle}>{new Date().toLocaleString()}</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          <p style={styles.subtitle}>{new Date().toLocaleString()}</p>
+
+          <button
+            onClick={() => setDark(!dark)}
+            style={{
+              padding: "6px 12px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              background: dark ? "#1e293b" : "#e2e8f0",
+              color: dark ? "#fff" : "#000",
+            }}
+          >
+            {dark ? "☀️ Light" : "🌙 Dark"}
+          </button>
+        </div>
       </div>
 
       <div style={styles.stats}>
@@ -210,11 +234,12 @@ function Dashboard() {
 export default Dashboard;
 
 const styles = {
-  container: {
+ container: {
     padding: "40px",
     fontFamily: "Inter, sans-serif",
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #eef2ff, #f8fafc)",
+    maxWidth: "1200px",
+    margin: "0 auto",
   },
 
   header: {
@@ -222,6 +247,14 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "40px",
+  },
+
+  statusBadge: {
+    padding: "6px 12px",
+    borderRadius: "20px",
+    background: "#dcfce7",
+    color: "#166534",
+    fontWeight: "600",
   },
 
   userInfo: {
@@ -286,13 +319,13 @@ const styles = {
   },
 
   actionCard: {
-    padding: "20px",
-    borderRadius: "12px",
-    background: "#3b82f6",
+    padding: "18px",
+    borderRadius: "14px",
     color: "white",
     textAlign: "center",
     textDecoration: "none",
     fontWeight: "600",
+    transition: "0.3s",
   },
 
   actionCardGreen: {
