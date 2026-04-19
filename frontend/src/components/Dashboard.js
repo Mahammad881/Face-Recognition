@@ -95,40 +95,46 @@ function Dashboard() {
       <div style={styles.stats}>
         <div
           style={styles.card}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.transform = "translateY(0) scale(1)")
-          }
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-8px)";
+            e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+          }}
         >
-          <p style={styles.cardTitle}>Total Students</p>
+          <p style={styles.cardTitle}>👨‍🎓 Total Students</p>
           <p style={styles.number}>{stats.totalStudents}</p>
         </div>
 
         <div
           style={styles.card}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.transform = "translateY(0) scale(1)")
-          }
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-8px)";
+            e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+          }}
         >
-          <p style={styles.cardTitle}>Today's Attendance</p>
+          <p style={styles.cardTitle}>📅 Today's Attendance</p>
           <p style={styles.number}>{stats.todayAttendance}</p>
         </div>
 
         <div
           style={styles.card}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.transform = "translateY(0) scale(1)")
-          }
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-8px)";
+            e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+          }}
         >
-          <p style={styles.cardTitle}>System Status</p>
+          <p style={styles.cardTitle}>⚙️ System Status</p>
           <p style={styles.status}>🟢 {stats.systemStatus}</p>
         </div>
       </div>
@@ -138,12 +144,14 @@ function Dashboard() {
           <Link
             to="/attendance-table"
             style={{ ...styles.actionCard, ...styles.view }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "translateY(0) scale(1)")
-            }
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+            }}
           >
             📋 View Attendance
           </Link>
@@ -153,12 +161,14 @@ function Dashboard() {
           <Link
             to="/add_student"
             style={{ ...styles.actionCard, ...styles.enroll }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "translateY(0) scale(1)")
-            }
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+            }}
           >
             ➕ Enroll Student
           </Link>
@@ -170,12 +180,14 @@ function Dashboard() {
           <Link
             to="/face"
             style={{ ...styles.actionCard, ...styles.kiosk }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-6px) scale(1.02)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "translateY(0) scale(1)")
-            }
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+            }}
           >
             📷 Start Face Recognition
           </Link>
@@ -201,8 +213,8 @@ const styles = {
   container: {
     padding: "40px",
     fontFamily: "Inter, sans-serif",
-    background: "#f8fafc",
     minHeight: "100vh",
+    background: "linear-gradient(135deg, #eef2ff, #f8fafc)",
   },
 
   header: {
@@ -259,10 +271,11 @@ const styles = {
   },
 
   card: {
-    background: "white",
+    background: "rgba(255,255,255,0.7)",
+    backdropFilter: "blur(10px)",
     padding: "25px",
-    borderRadius: "14px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+    borderRadius: "16px",
+    boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
     transition: "0.3s",
   },
 
@@ -313,5 +326,15 @@ const styles = {
     marginTop: "40px",
     display: "flex",
     justifyContent: "center",
+  },
+  view: {
+    background: "#3b82f6", // blue
+  },
+  enroll: {
+    background: "#10b981", // green
+  },
+
+  kiosk: {
+    background: "#6366f1", // purple
   },
 };
