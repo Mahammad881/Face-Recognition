@@ -7,7 +7,7 @@ const MODEL_PATH = "/models";
 
 function AddStudent() {
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
+  
 
   const [studentId, setStudentId] = useState("");
   const [name, setName] = useState("");
@@ -53,7 +53,7 @@ function AddStudent() {
       if (currentStream)
         currentStream.getTracks().forEach((track) => track.stop());
     };
-  }, [navigate]);
+  }, []);
 
   const captureAndExtract = async () => {
     if (loadingModels) {
