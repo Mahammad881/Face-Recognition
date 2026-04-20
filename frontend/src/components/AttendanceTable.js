@@ -189,11 +189,11 @@ const AttendanceTable = () => {
           <table style={styles.table}>
             <thead>
               <tr style={styles.theadRow}>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Time</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th style={styles.th}>ID</th>
+                <th style={styles.th}>Name</th>
+                <th style={styles.th}>Time</th>
+                <th style={styles.th}>Date</th>
+                <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
               </tr>
             </thead>
 
@@ -203,13 +203,24 @@ const AttendanceTable = () => {
                   const date = new Date(r.checkInTime);
 
                   return (
-                    <tr key={r.id} style={styles.row}>
+                    <tr
+                      key={r.id}
+                      style={styles.row}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = dark
+                          ? "#1e293b"
+                          : "#f9fafb")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
                       <td style={styles.tdBold}>{r.studentId}</td>
                       <td style={styles.td}>{r.studentName}</td>
                       <td style={styles.td}>{date.toLocaleTimeString()}</td>
                       <td style={styles.td}>{date.toLocaleDateString()}</td>
 
-                      <td style={styles.td}>
+                      <td style={{ ...styles.td, textAlign: "center" }}>
                         <div style={styles.actionGroup}>
                           <button
                             onClick={() => handleEdit(r)}
@@ -249,6 +260,7 @@ const getStyles = (dark) => {
     fontSize: "14px",
     color: dark ? "#e2e8f0" : "#000",
   };
+
   return {
     container: {
       background: dark ? "#0f172a" : "#f1f5f9",
@@ -301,8 +313,9 @@ const getStyles = (dark) => {
 
     row: {
       borderBottom: dark ? "1px solid #334155" : "1px solid #eee",
+      cursor: "pointer",
+      transition: "background 0.2s ease", // 👈 ADD THIS
     },
-
     td,
     tdBold: {
       ...td,
@@ -330,6 +343,7 @@ const getStyles = (dark) => {
     actionGroup: {
       display: "flex",
       gap: "8px",
+      justifyContent: "center", // 👈 ADD THIS
     },
 
     primaryBtn: {
@@ -371,6 +385,15 @@ const getStyles = (dark) => {
       textAlign: "center",
       padding: "20px",
       color: dark ? "#94a3b8" : "#999",
+    },
+
+    th: {
+      padding: "12px",
+      textAlign: "left",
+      fontSize: "14px",
+      fontWeight: "600",
+      borderBottom: dark ? "1px solid #475569" : "1px solid #ddd",
+      color: dark ? "#cbd5f5" : "#334155",
     },
   };
 };
