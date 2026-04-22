@@ -123,7 +123,7 @@ function Login() {
               required
               className="input"
               aria-label="Password"
-              style={{ paddingRight: "40px" }}
+              
             />
             <button
               type="button"
