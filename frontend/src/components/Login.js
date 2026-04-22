@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../utils/api";
-
+import "./Login.css";
 const styles = {
   container: {
     display: "flex",
@@ -34,18 +34,6 @@ const styles = {
     color: "#666",
     marginBottom: "25px",
   },
-
-  input: {
-    width: "100%",
-    padding: "12px",
-    marginBottom: "15px",
-    borderRadius: "6px",
-    border: "1px solid #ddd",
-    fontSize: "14px",
-    outline: "none",
-    transition: "0.2s",
-  },
-
   button: {
     width: "100%",
     padding: "12px",
@@ -57,7 +45,7 @@ const styles = {
     fontWeight: "bold",
     fontSize: "15px",
     letterSpacing: "0.5px",
-    transition: "0.2s",
+    transition: "all 0.2s ease",
   },
 
   error: {
@@ -78,6 +66,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -121,22 +110,48 @@ function Login() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            style={styles.input}
+            className="input"
+            aria-label="Username"
           />
 
-          <input
-            type="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={styles.input}
-          />
-
+          <div style={{ position: "relative", marginBottom: "15px" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="input"
+              aria-label="Password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                border: "none",
+                background: "transparent",
+                fontSize: "18px",
+                padding: "4px",
+                 cursor: "pointer"
+              }}
+            >
+              {showPassword ? "🙈" : "👁"}
+            </button>
+          </div>
           {error && <p style={styles.error}>{error}</p>}
 
-          <button type="submit" disabled={loading} style={styles.button}>
-            {loading ? "Authenticating..." : "Login"}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              ...styles.button,
+            }}
+          >
+            {loading ? "⏳ Authenticating..." : "Login"}
           </button>
         </form>
 
