@@ -332,7 +332,7 @@ function FaceRecognition() {
         textAlign: "center",
       }}
     >
-      <h2>🎓 Smart Attendance Kiosk</h2>
+      <h2>🎓 KHK Smart Attendance </h2>
 
       <div
         style={{
