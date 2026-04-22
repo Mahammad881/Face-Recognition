@@ -123,6 +123,7 @@ function Login() {
               required
               className="input"
               aria-label="Password"
+              style={{ paddingRight: "40px" }}
             />
             <button
               type="button"
@@ -137,6 +138,8 @@ function Login() {
                 fontSize: "18px",
                 padding: "6px",
                 cursor: "pointer",
+                zIndex: 2,
+                color: "#000",
               }}
             >
               {showPassword ? "🙈" : "👁"}
