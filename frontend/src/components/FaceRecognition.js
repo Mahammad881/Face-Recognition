@@ -4,7 +4,7 @@ import * as faceapi from "face-api.js/dist/face-api.min.js";
 import { getStudentDescriptors, markPresent } from "../utils/api";
 import { applyThemeToBody } from "../utils/theme"; // 👈 ADD THIS
 const MODEL_PATH = "/models";
-const MIN_DISTANCE_THRESHOLD = 0.45;
+const MIN_DISTANCE_THRESHOLD = 0.5;
 const DETECTION_INTERVAL = 500;
 // ✅ ✅ ✅ ADD THIS HERE (ABOVE COMPONENT)
 
@@ -58,6 +58,14 @@ function FaceRecognition() {
   const messageRef = useRef("");
   const noFaceCountRef = useRef(0);
   const speakingRef = useRef(false);
+  // ✅ ADD HERE
+  const status = message.includes("✅")
+    ? "success"
+    : message.includes("⚠")
+      ? "warning"
+      : message.includes("❌")
+        ? "error"
+        : "idle";
 
   const [currentTime, setCurrentTime] = useState(Date.now());
   const currentTimeRef = useRef(currentTime);
@@ -237,55 +245,57 @@ function FaceRecognition() {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           resized.forEach((detection) => {
             const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
+            const confidence = (1 - bestMatch.distance).toFixed(2);
             const box = detection.detection.box;
+
+            const student = studentsRef.current.find(
+              (s) => s.studentId === bestMatch.label,
+            );
+
             if (
               bestMatch.label !== "unknown" &&
-              bestMatch.distance < MIN_DISTANCE_THRESHOLD
+              bestMatch.distance < MIN_DISTANCE_THRESHOLD &&
+              student
             ) {
-              const student = studentsRef.current.find(
-                (s) => s.studentId === bestMatch.label,
-              );
-              if (!student) return;
               const now = Date.now();
+
               if (!student.lastMarked || now - student.lastMarked > 60000) {
                 markPresent(student.studentId)
                   .then((res) => {
+                    const remainingTime = getRemainingPeriodTime(
+                      currentTimeRef.current,
+                      PERIOD_START_TIME.current,
+                    );
+
                     if (res.status === "cooldown") {
-                      const remainingTime = getRemainingPeriodTime(
-                        currentTimeRef.current,
-                        PERIOD_START_TIME.current,
-                      );
-                      const msg = `${student.name}, you already marked attendance. ${remainingTime} remaining in this period`;
+                      const msg = `${student.name}, already marked. ${remainingTime} left`;
                       setMessage(
-                        `⏳ ${student.name} You're Already Present come after: ${remainingTime} time`,
+                        `⏳ ${student.name} Already Present • ${remainingTime}`,
                       );
                       setTimeout(() => speak(msg), 300);
                     } else if (res.status === "success") {
                       student.lastMarked = now;
 
-                      const remainingTime = getRemainingPeriodTime(
-                        currentTimeRef.current,
-                        PERIOD_START_TIME.current,
-                      );
-                      const msg = `${getGreeting()} ${student.name}, attendance marked. You have ${remainingTime} remaining in this period`;
+                      const msg = `${getGreeting()} ${student.name}, marked. ${remainingTime} left`;
                       setMessage(
-                        `✅ ${student.name} marked • Remaining: ${remainingTime}`,
+                        `✅ ${student.name} marked • ${remainingTime}`,
                       );
                       setTimeout(() => speak(msg), 300);
                     } else {
-                      setMessage(`⚠ ${student.name}: Unexpected response`);
+                      setMessage(`⚠ ${student.name}: Unexpected`);
                     }
                   })
                   .catch((err) => {
                     setMessage(`❌ ${student.name}: ${err.message}`);
                   });
               }
+
               new faceapi.draw.DrawBox(box, {
                 label: student.name,
               }).draw(canvas);
             } else {
               new faceapi.draw.DrawBox(box, {
-                label: "Unknown",
+                label: student ? `${student.name} (${confidence})` : "Unknown",
               }).draw(canvas);
             }
           });
@@ -323,14 +333,26 @@ function FaceRecognition() {
       }}
     >
       <h2>🎓 Smart Attendance Kiosk</h2>
-      <p
+
+      <div
         style={{
-          color: dark ? "#60a5fa" : "#007bff",
-          fontWeight: "bold",
+          padding: "8px 16px",
+          borderRadius: "20px",
+          background:
+            status === "success"
+              ? "#dcfce7"
+              : status === "warning"
+                ? "#fef3c7"
+                : status === "error"
+                  ? "#fee2e2"
+                  : "#e5e7eb",
+          color: "#000",
+          fontWeight: "600",
+          marginTop: "10px",
         }}
       >
         {message}
-      </p>
+      </div>
       <div
         style={{
           position: "relative",
@@ -345,7 +367,29 @@ function FaceRecognition() {
           playsInline
           width="640"
           height="480"
-          style={{ borderRadius: "10px" }}
+          style={{
+            borderRadius: "10px",
+
+            border:
+              status === "success"
+                ? "4px solid #22c55e"
+                : status === "warning"
+                  ? "4px solid #f59e0b"
+                  : status === "error"
+                    ? "4px solid #ef4444"
+                    : "4px solid transparent",
+
+            boxShadow:
+              status === "success"
+                ? "0 0 20px rgba(34,197,94,0.6)"
+                : status === "warning"
+                  ? "0 0 20px rgba(245,158,11,0.6)"
+                  : status === "error"
+                    ? "0 0 20px rgba(239,68,68,0.6)"
+                    : "none",
+
+            transition: "0.3s",
+          }}
         />
         <canvas
           ref={canvasRef}
