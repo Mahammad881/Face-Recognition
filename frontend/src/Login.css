@@ -12,10 +12,21 @@
 /* 🔥 This replaces your onFocus/onBlur */
 .input:focus {
   border: 1px solid #007bff;
+  box-shadow: 0 0 6px rgba(0,123,255,0.3);
 }
 
 button[type="submit"]:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
+}
+button[type="submit"] {
+  transition: all 0.2s ease;
+}
+button[type="button"] {
+  transition: transform 0.15s ease;
+}
+button[type="button"]:hover {
+  transform: scale(1.1);
 }
 
 button:disabled {

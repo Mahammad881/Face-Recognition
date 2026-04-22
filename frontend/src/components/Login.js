@@ -135,8 +135,8 @@ function Login() {
                 border: "none",
                 background: "transparent",
                 fontSize: "18px",
-                padding: "4px",
-                 cursor: "pointer"
+                padding: "6px",
+                cursor: "pointer",
               }}
             >
               {showPassword ? "🙈" : "👁"}
