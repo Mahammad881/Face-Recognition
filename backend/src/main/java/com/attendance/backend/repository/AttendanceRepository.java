@@ -19,4 +19,5 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     // ✅ NEW (IMPORTANT)
     Attendance findTopByStudentIdOrderByCheckInTimeDesc(String studentId);
+    
 }

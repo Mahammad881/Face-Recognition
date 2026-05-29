@@ -5,7 +5,6 @@ import com.attendance.backend.service.AttendanceService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -19,68 +18,52 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
-    @PostMapping("/present")
-    public ResponseEntity<?> markPresent(@RequestBody Map<String, String> body) {
+ @PostMapping("/present")
+public ResponseEntity<?> markPresent(@RequestBody Map<String, String> body) {
 
-        String studentId = body.get("studentId");
+    String studentId = body.get("studentId");
 
-        if (studentId == null || studentId.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(
+    if (studentId == null || studentId.trim().isEmpty()) {
+        return ResponseEntity.badRequest().body(
                 Map.of("message", "Student ID missing"));
-        }
+    }
 
-        studentId = studentId.trim().toUpperCase();
+    studentId = studentId.trim().toUpperCase();
 
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+    // ✅ Get student name
+    String studentName = attendanceService.getStudentNameById(studentId);
 
-        Attendance lastAttendance = attendanceService.getLastAttendance(studentId);
-
-        // ✅ COOLDOWN CHECK
-        if (lastAttendance != null && lastAttendance.getCheckInTime() != null) {
-
-            long lastTime = lastAttendance.getCheckInTime().getTime();
-            long currentTime = System.currentTimeMillis();
-
-            long diffMinutes = (currentTime - lastTime) / (60 * 1000);
-
-            if (diffMinutes < 60) {
-                long remaining = 60 - diffMinutes;
-
-                return ResponseEntity.ok(
-                    Map.of(
-                        "status", "cooldown",
-                        "message", "Please come after " + remaining + " minutes",
-                        "remainingMinutes", remaining
-                    )
-                );
-            }
-        }
-
-        String studentName = attendanceService.getStudentNameById(studentId);
-
-        if (studentName.equals("Unknown")) {
-            return ResponseEntity.badRequest().body(
+    if (studentName.equals("Unknown")) {
+        return ResponseEntity.badRequest().body(
                 Map.of("message", "Invalid student ID: " + studentId));
-        }
+    }
 
-        Attendance attendance = new Attendance();
-        attendance.setStudentId(studentId);
-        attendance.setStudentName(studentName);
-        attendance.setStatus("Present");
-        attendance.setCheckInTime(now);
+    // ✅ CALL SERVICE (MAIN FIX 🔥)
+    String result = attendanceService.markAttendance(studentId);
 
-        attendanceService.saveAttendance(attendance);
-
+    if (result.equals("cooldown")) {
         return ResponseEntity.ok(
-            Map.of(
-                "status", "success",
-                "message", "Attendance marked",
-                "studentId", studentId,
-                "studentName", studentName
-            )
+                Map.of(
+                        "status", "cooldown",
+                        "message", "Already marked within 1 hour"
+                )
         );
     }
 
+    if (result.equals("success")) {
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", "success",
+                        "message", "Attendance marked",
+                        "studentId", studentId,
+                        "studentName", studentName
+                )
+        );
+    }
+
+    return ResponseEntity.status(500).body(
+            Map.of("message", "Something went wrong"));
+}
     @GetMapping
     public ResponseEntity<List<Attendance>> getAllAttendance() {
         return ResponseEntity.ok(attendanceService.getAllAttendance());
