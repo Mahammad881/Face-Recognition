@@ -33,7 +33,7 @@ public ResponseEntity<?> markPresent(@RequestBody Map<String, String> body) {
     // ✅ Get student name
     String studentName = attendanceService.getStudentNameById(studentId);
 
-    if (studentName.equals("Unknown")) {
+    if ("Unknown".equals(studentName)){
         return ResponseEntity.badRequest().body(
                 Map.of("message", "Invalid student ID: " + studentId));
     }

@@ -6,6 +6,7 @@ import { applyThemeToBody } from "../utils/theme"; // 👈 ADD THIS
 const MODEL_PATH = "/models";
 const MIN_DISTANCE_THRESHOLD = 0.5;
 const DETECTION_INTERVAL = 500;
+
 // ✅ ✅ ✅ ADD THIS HERE (ABOVE COMPONENT)
 
 const getRemainingPeriodTime = (currentTime, startTime) => {
@@ -57,6 +58,7 @@ function FaceRecognition() {
   const intervalRef = useRef(null);
   const messageRef = useRef("");
   const noFaceCountRef = useRef(0);
+  const processingRef = useRef({});
   const speakingRef = useRef(false);
   // ✅ ADD HERE
   const status = message.includes("✅")
@@ -259,36 +261,39 @@ function FaceRecognition() {
             ) {
               const now = Date.now();
 
-              if (!student.lastMarked || now - student.lastMarked > 60000) {
-                markPresent(student.studentId)
-                  .then((res) => {
-                    const remainingTime = getRemainingPeriodTime(
-                      currentTimeRef.current,
-                      PERIOD_START_TIME.current,
-                    );
+              // 🚀 HARD LOCK (prevents multiple API calls completely)
+              if (processingRef.current[student.studentId]) return;
 
-                    if (res.status === "cooldown") {
-                      const msg = `${student.name}, already marked. ${remainingTime} left`;
-                      setMessage(
-                        `⏳ ${student.name} Already Present • ${remainingTime}`,
-                      );
-                      setTimeout(() => speak(msg), 300);
-                    } else if (res.status === "success") {
-                      student.lastMarked = now;
+              // 🚀 COOLDOWN (1 minute)
+              if (student.lastMarked && now - student.lastMarked < 60000) return;
 
-                      const msg = `${getGreeting()} ${student.name}, marked. ${remainingTime} left`;
-                      setMessage(
-                        `✅ ${student.name} marked • ${remainingTime}`,
-                      );
-                      setTimeout(() => speak(msg), 300);
-                    } else {
-                      setMessage(`⚠ ${student.name}: Unexpected`);
-                    }
-                  })
-                  .catch((err) => {
-                    setMessage(`❌ ${student.name}: ${err.message}`);
-                  });
-              }
+              processingRef.current[student.studentId] = true; // LOCK
+
+              markPresent(student.studentId)
+                .then((res) => {
+                  const remainingTime = getRemainingPeriodTime(
+                    currentTimeRef.current,
+                    PERIOD_START_TIME.current
+                  );
+
+                  if (res.status === "cooldown") {
+                    setMessage(`⏳ ${student.name} Already Present • ${remainingTime}`);
+                  } else if (res.status === "success") {
+                    student.lastMarked = now; // ✅ IMPORTANT
+                    setMessage(`✅ ${student.name} marked • ${remainingTime}`);
+                  } else {
+                    setMessage(`⚠ ${student.name}: Unexpected`);
+                  }
+                })
+                .catch((err) => {
+                  setMessage(`❌ ${student.name}: ${err.message}`);
+                })
+                .finally(() => {
+                  // 🔥 Keep lock longer to avoid re-trigger spam
+                  setTimeout(() => {
+                    processingRef.current[student.studentId] = false;
+                  }, 10000); // ✅ 10 sec lock (IMPORTANT)
+                });
 
               new faceapi.draw.DrawBox(box, {
                 label: student.name,

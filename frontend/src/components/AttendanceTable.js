@@ -43,7 +43,7 @@ const AttendanceTable = () => {
         r.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesDate = selectedDate
-        ? new Date(r.checkInTime).toISOString().split("T")[0] === selectedDate
+        ? new Date(r.checkInTime).toLocaleDateString("en-CA") === selectedDate
         : true;
 
       return matchesSearch && matchesDate;
