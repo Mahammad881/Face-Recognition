@@ -249,7 +249,6 @@ function FaceRecognition() {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           resized.forEach((detection) => {
             const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
-            const confidence = (1 - bestMatch.distance).toFixed(2);
             const box = detection.detection.box;
 
             const student = studentsRef.current.find(
