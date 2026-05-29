@@ -21,16 +21,20 @@ public class DashboardController {
         this.studentRepository = studentRepository;
         this.attendanceRepository = attendanceRepository;
     }
-
     @GetMapping("/stats")
 public Map<String, Object> getStats() {
 
     long totalStudents = studentRepository.count();
 
-    LocalDate today = LocalDate.now();
+    ZoneId zone = ZoneId.of("Asia/Kolkata");
 
-    Timestamp start = Timestamp.valueOf(today.atStartOfDay());
-    Timestamp end = Timestamp.valueOf(today.plusDays(1).atStartOfDay()); // ✅ FIX
+    LocalDate today = LocalDate.now(zone); // ✅ IMPORTANT
+
+    ZonedDateTime startOfDay = today.atStartOfDay(zone);
+    ZonedDateTime endOfDay = startOfDay.plusDays(1);
+
+    Timestamp start = Timestamp.valueOf(startOfDay.toLocalDateTime());
+    Timestamp end = Timestamp.valueOf(endOfDay.toLocalDateTime());
 
     long todayAttendance = attendanceRepository.countTodayAttendance(start, end);
 
@@ -41,4 +45,5 @@ public Map<String, Object> getStats() {
 
     return response;
 }
+
 }

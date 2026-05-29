@@ -21,6 +21,10 @@ const AttendanceTable = () => {
   /* ================= FETCH ================= */
   useEffect(() => {
     fetchAttendance();
+
+    const interval = setInterval(fetchAttendance, 3000); // refresh every 3 sec
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchAttendance = async () => {
@@ -207,9 +211,9 @@ const AttendanceTable = () => {
                       key={r.id}
                       style={styles.row}
                       onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = dark
-                          ? "#1e293b"
-                          : "#f9fafb")
+                      (e.currentTarget.style.background = dark
+                        ? "#1e293b"
+                        : "#f9fafb")
                       }
                       onMouseLeave={(e) =>
                         (e.currentTarget.style.background = "transparent")
