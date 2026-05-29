@@ -33,13 +33,16 @@ public class AttendanceService {
 
     studentId = studentId.trim().toUpperCase();
 
-    Timestamp oneHourAgo = new Timestamp(System.currentTimeMillis() - (60 * 60 * 1000));
+    Attendance last = attendanceRepository
+        .findTopByStudentIdOrderByCheckInTimeDesc(studentId);
 
-    long count = attendanceRepository.countRecentAttendance(studentId, oneHourAgo);
+if (last != null) {
+    long diff = System.currentTimeMillis() - last.getCheckInTime().getTime();
 
-    if (count > 0) {
+    if (diff < 60 * 60 * 1000) {
         return "cooldown";
     }
+}
 
     // ✅ GET NAME
     String studentName = getStudentNameById(studentId);
