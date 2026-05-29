@@ -21,12 +21,7 @@ const AttendanceTable = () => {
   /* ================= FETCH ================= */
   useEffect(() => {
     fetchAttendance();
-
-    const interval = setInterval(fetchAttendance, 3000); // refresh every 3 sec
-
-    return () => clearInterval(interval);
   }, []);
-
   const fetchAttendance = async () => {
     try {
       setLoading(true);
