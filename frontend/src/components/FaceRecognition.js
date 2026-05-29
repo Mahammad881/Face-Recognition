@@ -160,11 +160,13 @@ function FaceRecognition() {
         setMessage("⚠ No students enrolled yet.");
         return;
       }
+
       studentsRef.current = data.map((s) => ({
         studentId: s.studentId,
         name: s.name,
         descriptor: s.descriptor,
         lastMarked: null,
+        hasSpoken: false, // ✅ ADD THIS
       }));
       const labeledDescriptors = [];
       data.forEach((student) => {
@@ -261,13 +263,35 @@ function FaceRecognition() {
             ) {
               const now = Date.now();
 
-              // 🚀 HARD LOCK (prevents multiple API calls completely)
               if (processingRef.current[student.studentId]) return;
 
-              // 🚀 COOLDOWN (1 minute)
-              if (student.lastMarked && now - student.lastMarked < 60000) return;
+              const ONE_HOUR = 60 * 60 * 1000;
 
-              processingRef.current[student.studentId] = true; // LOCK
+              // ✅ RESET after 1 hour
+              if (student.lastMarked && now - student.lastMarked >= ONE_HOUR) {
+                student.hasSpoken = false;
+                student.lastMarked = null;
+              }
+
+              // ✅ IF already marked within hour
+              if (student.lastMarked && now - student.lastMarked < ONE_HOUR) {
+                const remainingTime = getRemainingPeriodTime(
+                  currentTimeRef.current,
+                  PERIOD_START_TIME.current
+                );
+
+                setMessage(`⏳ ${student.name} Already Present • ${remainingTime}`);
+
+                // 🔥 SPEAK ONLY ONCE (IMPORTANT FIX)
+                if (!student.hasSpoken) {
+                  speak(`${student.name}, you are already present. ${remainingTime} remaining`);
+                  student.hasSpoken = true;
+                }
+
+                return;
+              }
+
+              processingRef.current[student.studentId] = true;
 
               markPresent(student.studentId)
                 .then((res) => {
@@ -276,11 +300,16 @@ function FaceRecognition() {
                     PERIOD_START_TIME.current
                   );
 
-                  if (res.status === "cooldown") {
-                    setMessage(`⏳ ${student.name} Already Present • ${remainingTime}`);
-                  } else if (res.status === "success") {
-                    student.lastMarked = now; // ✅ IMPORTANT
+                  if (res.status === "success") {
+                    student.lastMarked = now;
+
                     setMessage(`✅ ${student.name} marked • ${remainingTime}`);
+
+                    // ✅ speak only once per hour
+                    if (!student.hasSpoken) {
+                      speak(`${getGreeting()} ${student.name}, ${remainingTime} remaining`);
+                      student.hasSpoken = true;
+                    }
                   } else {
                     setMessage(`⚠ ${student.name}: Unexpected`);
                   }
@@ -289,18 +318,13 @@ function FaceRecognition() {
                   setMessage(`❌ ${student.name}: ${err.message}`);
                 })
                 .finally(() => {
-                  // 🔥 Keep lock longer to avoid re-trigger spam
                   setTimeout(() => {
                     processingRef.current[student.studentId] = false;
-                  }, 10000); // ✅ 10 sec lock (IMPORTANT)
+                  }, 10000);
                 });
 
               new faceapi.draw.DrawBox(box, {
                 label: student.name,
-              }).draw(canvas);
-            } else {
-              new faceapi.draw.DrawBox(box, {
-                label: student ? `${student.name} (${confidence})` : "Unknown",
               }).draw(canvas);
             }
           });
